@@ -34,7 +34,7 @@ namespace Rhino.Local.Controllers
             return Ok("pong");
         }
 
-        #region *** GET  ***
+        #region *** GET    ***
         [HttpGet]
         [Route("meta/plugins")]
         [Route("meta/assertions")]
@@ -73,7 +73,8 @@ namespace Rhino.Local.Controllers
         {
             // bridge
             var response = await client.GetAsync(Request.Path.ToString());
-            logger.LogInformation($"Get-FromRhino " +
+            logger.LogInformation("Resolve-RhinoRoute" +
+                " -Method GET" +
                 $"-Mode Bridge " +
                 $"-Route {Request.Path} " +
                 $"-Parameter {route} = {response.StatusCode}");
@@ -83,7 +84,7 @@ namespace Rhino.Local.Controllers
         }
         #endregion
 
-        #region *** POST ***
+        #region *** POST   ***
         [HttpPost]
         [Route("rhino/configurations/invoke")]
         [Route("plugins")]
@@ -106,7 +107,38 @@ namespace Rhino.Local.Controllers
 
             // bridge
             var response = await client.PostAsync(route, content);
-            logger.LogInformation($"Get-FromRhino " +
+            logger.LogInformation("Resolve-RhinoRoute" +
+                " -Method POST " +
+                $"-Mode Bridge " +
+                $"-Route {Request.Path} " +
+                $"-Parameter {route} = {response.StatusCode}");
+
+            // get
+            return response.GetContentResult();
+        }
+        #endregion
+
+        #region *** DELETE ***
+        [HttpDelete]
+        [Route("models")]
+        public Task<IActionResult> Delete()
+        {
+            return InvokeDelete(route: "All");
+        }
+
+        [HttpDelete]
+        [Route("models/{route}")]
+        public Task<IActionResult> Delete(string route)
+        {
+            return InvokeDelete(route);
+        }
+
+        private async Task<IActionResult> InvokeDelete(string route)
+        {
+            // bridge
+            var response = await client.DeleteAsync(Request.Path.ToString());
+            logger.LogInformation("Resolve-RhinoRoute" +
+                " -Method DELETE" +
                 $"-Mode Bridge " +
                 $"-Route {Request.Path} " +
                 $"-Parameter {route} = {response.StatusCode}");
