@@ -19,6 +19,7 @@
     },
     "Rhino.Local": {
       "commandName": "Project",
+      "commandLineArgs": "https://machine:443/rhino",
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {

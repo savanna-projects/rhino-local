@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 
 # setup
 WORKDIR /app
-EXPOSE 9000
+EXPOSE 9003
 
 # tools
 RUN apt-get update \

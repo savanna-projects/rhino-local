@@ -3,9 +3,7 @@ using Microsoft.Extensions.Logging;
 
 using Rhino.Local.Extensions;
 
-using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Rhino.Local.Controllers
@@ -17,7 +15,7 @@ namespace Rhino.Local.Controllers
         // members: injection
         private readonly ILogger<BridgeController> logger;
         private readonly HttpClient client;
-        
+
         /// <summary>
         /// Creates a new instance of the controller
         /// </summary>
@@ -28,123 +26,121 @@ namespace Rhino.Local.Controllers
             this.client = client;
         }
 
-        [HttpGet, Route("ping")]
-        public IActionResult Ping()
-        {
-            return Ok("pong");
-        }
-
-        #region *** GET    ***
+        #region *** Get    ***
         [HttpGet]
-        [Route("meta/plugins")]
-        [Route("meta/assertions")]
-        [Route("meta/connectors")]
-        [Route("meta/drivers")]
-        [Route("meta/locators")]
-        [Route("meta/macros")]
-        [Route("meta/operators")]
-        [Route("meta/reporters")]
+        [Route("configurations")]
+        [Route("configurations/{path}")]
+        [Route("environment")]
+        [Route("environment/{path}")]
+        [Route("environment/sync")]
+        [Route("logs")]
+        [Route("logs/{path}")]
+        [Route("logs/{path}/export")]
+        [Route("logs/{path}/size/{parameter}")]
         [Route("meta/annotations")]
+        [Route("meta/annotations/{path}")]
+        [Route("meta/assertions")]
+        [Route("meta/assertions/{path}")]
+        [Route("meta/connectors")]
+        [Route("meta/connectors/{path}")]
+        [Route("meta/drivers")]
+        [Route("meta/drivers/{path}")]
+        [Route("meta/locators")]
+        [Route("meta/locators/{path}")]
+        [Route("meta/macros")]
+        [Route("meta/macros/{path}")]
+        [Route("meta/operators")]
+        [Route("meta/operators/{path}")]
+        [Route("meta/plugins")]
+        [Route("meta/plugins/{path}")]
+        [Route("meta/reporters")]
+        [Route("meta/reporters/{path}")]
         [Route("meta/models")]
+        [Route("meta/models/{path}")]
         [Route("meta/verbs")]
         [Route("meta/attributes")]
+        [Route("models")]
+        [Route("models/{path}")]
+        [Route("models/{path}/configurations")]
+        [Route("ping/rhino")]
+        [Route("plugins")]
+        [Route("plugins/{path}")]
+        [Route("rhino/async/collections/invoke/{path}")]
+        [Route("rhino/async/configurations/invoke/{path}")]
+        [Route("rhino/async/configurations/{path}/collections/invoke/{parameter}")]
+        [Route("rhino/async/status/{path}")]
+        [Route("rhino/async/status")]
+        [Route("rhino/collections/invoke/{path}")]
+        [Route("rhino/configurations/invoke/{path}")]
+        [Route("rhino/configurations/{path}/collections/invoke/{parameter}")]
+        [Route("tests")]
+        [Route("tests/{path}")]
+        [Route("tests/{path}/configurations")]
         public Task<IActionResult> Get()
         {
-            return InvokeGet(route: "All");
-        }
-
-        [HttpGet]
-        [Route("meta/plugins/{route}")]
-        [Route("meta/assertions/{route}")]
-        [Route("meta/connectors/{route}")]
-        [Route("meta/drivers/{route}")]
-        [Route("meta/locators/{route}")]
-        [Route("meta/macros/{route}")]
-        [Route("meta/operators/{route}")]
-        [Route("meta/reporters/{route}")]
-        [Route("meta/annotations/{route}")]
-        [Route("meta/models/{route}")]
-        public Task<IActionResult> Get(string route)
-        {
-            return InvokeGet(route);
-        }
-
-        private async Task<IActionResult> InvokeGet(string route)
-        {
-            // bridge
-            var response = await client.GetAsync(Request.Path.ToString());
-            logger.LogInformation("Resolve-RhinoRoute" +
-                " -Method GET" +
-                $"-Mode Bridge " +
-                $"-Route {Request.Path} " +
-                $"-Parameter {route} = {response.StatusCode}");
-
-            // get
-            return response.GetContentResult();
+            return client.InvokeBridgeRequest(Request, Response, logger);
         }
         #endregion
 
-        #region *** POST   ***
+        #region *** Post   ***
         [HttpPost]
-        [Route("rhino/configurations/invoke")]
-        [Route("plugins")]
-        [Route("models")]
+        [Route("configurations")]
+        [Route("debug")]
         [Route("integration/create")]
+        [Route("models")]
+        [Route("models/{path}")]
+        [Route("plugins")]
+        [Route("rhino/async/configurations/invoke")]
+        [Route("rhino/async/configurations/{path}/collections/invoke")]
+        [Route("rhino/configurations/invoke")]
+        [Route("rhino/configurations/{path}/collections/invoke")]
+        [Route("tests")]
+        [Route("tests/{path}")]
         public Task<IActionResult> Post()
         {
-            return InvokePost();
-        }
-
-        private async Task<IActionResult> InvokePost()
-        {
-            // setup
-            var reader = new StreamReader(Request.Body);
-            var requestBody = await reader.ReadToEndAsync();
-            var route = Request.Path.ToString();
-
-            // content
-            var content = new StringContent(requestBody, Encoding.UTF8, Request.ContentType);
-
-            // bridge
-            var response = await client.PostAsync(route, content);
-            logger.LogInformation("Resolve-RhinoRoute" +
-                " -Method POST " +
-                $"-Mode Bridge " +
-                $"-Route {Request.Path} " +
-                $"-Parameter {route} = {response.StatusCode}");
-
-            // get
-            return response.GetContentResult();
+            return client.InvokeBridgeRequest(Request, Response, logger);
         }
         #endregion
 
-        #region *** DELETE ***
+        #region *** Delete ***
         [HttpDelete]
+        [Route("configurations")]
+        [Route("configurations/{path}")]
+        [Route("environment")]
+        [Route("environment/{path}")]
         [Route("models")]
+        [Route("models/{path}")]
+        [Route("plugins")]
+        [Route("plugins/{path}")]
+        [Route("rhino/async/status")]
+        [Route("rhino/async/status/{path}")]
+        [Route("tests")]
+        [Route("tests/{path}")]
         public Task<IActionResult> Delete()
         {
-            return InvokeDelete(route: "All");
+            return client.InvokeBridgeRequest(Request, Response, logger);
         }
+        #endregion
 
-        [HttpDelete]
-        [Route("models/{route}")]
-        public Task<IActionResult> Delete(string route)
+        #region *** Put    ***
+        [HttpPut]
+        [Route("configurations/{path}")]
+        [Route("environment/{path}")]
+        public Task<IActionResult> Put()
         {
-            return InvokeDelete(route);
+            return client.InvokeBridgeRequest(Request, Response, logger);
         }
+        #endregion
 
-        private async Task<IActionResult> InvokeDelete(string route)
+        #region *** Patch  ***
+        [HttpPatch]
+        [Route("models/{path}")]
+        [Route("models/{path}/configurations/{parameter}")]
+        [Route("tests/{path}")]
+        [Route("tests/{path}/configurations/{parameter}")]
+        public Task<IActionResult> Patch()
         {
-            // bridge
-            var response = await client.DeleteAsync(Request.Path.ToString());
-            logger.LogInformation("Resolve-RhinoRoute" +
-                " -Method DELETE" +
-                $"-Mode Bridge " +
-                $"-Route {Request.Path} " +
-                $"-Parameter {route} = {response.StatusCode}");
-
-            // get
-            return response.GetContentResult();
+            return client.InvokeBridgeRequest(Request, Response, logger);
         }
         #endregion
     }
